@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <colors.h>
+#include <lexer.h>
+#include <token.h>
 
 
 static void start(const char* filename) {
@@ -10,18 +12,9 @@ static void start(const char* filename) {
         exit(1);
     }
 
-
     FILE* fp = fopen(filename, "r");
+    lex_init(fp);
 
-    // Get file size.
-    fseek(fp, 0, SEEK_END);
-    size_t file_size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    // Allocate memory for contents.
-    char* contents = calloc(file_size + 1, sizeof(char));
-
-    free(contents);
     fclose(fp);
 }
 
