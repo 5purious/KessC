@@ -186,9 +186,16 @@ void gencode(struct ASTNode* node) {
     interpret_ast(node);
     epilogue();
     fclose(out);
-    // Output an ELF and remove the junk files.
-    system("as " ASM_OUT " -o /tmp/kcc-out.o");
-    system("gcc /tmp/kcc-out.o -o ./a.out");
-    remove("/tmp/kcc-out.o");
-    remove(ASM_OUT);
+    
+    extern uint8_t only_assembly;
+
+    if (!(only_assembly)) {                 // If the user didn't request ONLY asm.
+        // Output an ELF and remove the junk files.
+        system("as " ASM_OUT " -o /tmp/kcc-out.o");
+        system("gcc /tmp/kcc-out.o -o ./a.out");
+        remove("/tmp/kcc-out.o");
+        remove(ASM_OUT);
+    } else {
+        system("mv " ASM_OUT " ./");
+    }
 }

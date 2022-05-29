@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <colors.h>
 #include <lexer.h>
 #include <token.h>
@@ -10,6 +12,8 @@
 #if defined(_WIN32) || defined(WIN32)
 #error LINUX ONLY!
 #endif
+
+uint8_t only_assembly = 0;
 
 
 static void start(const char* filename) {
@@ -38,6 +42,8 @@ int main(int argc, const char** argv) {
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] != '-') {
             start(argv[i]);
+        } else if (strcmp(argv[i], "-S") == 0) {
+            only_assembly = 1;
         }
     }
 
