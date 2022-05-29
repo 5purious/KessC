@@ -4,6 +4,7 @@
 #include <lexer.h>
 #include <expr.h>
 #include <colors.h>
+#include <codegen.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,36 +60,9 @@ static struct ASTNode* binexpr() {
 
 }
 
-int interpret_ast(struct ASTNode* root) {
-    int leftval, rightval;
-
-    // Get left, right sub-tree values.
-    if (root->left)
-        leftval = interpret_ast(root->left);
-
-    if (root->right)
-        rightval = interpret_ast(root->right);
-
-    switch (root->op) {
-        case A_ADD:
-            return leftval + rightval;
-        case A_SUB:
-            return leftval + rightval;
-        case A_MUL:
-            return leftval * rightval;
-        case A_DIV:
-            return leftval / rightval;
-        case A_INTLIT:
-            return root->val_int;
-        default:
-            return 1;
-    }
-
-}
-
 
 void parse(void) {
     scan(&cur_token);
     struct ASTNode* root = binexpr();
-    printf("%d\n", interpret_ast(root));
+    gencode(root);
 }

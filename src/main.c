@@ -7,6 +7,10 @@
 #include <parser.h>
 #include <AST.h>
 
+#if defined(_WIN32) || defined(WIN32)
+#error LINUX ONLY!
+#endif
+
 
 static void start(const char* filename) {
     if (access(filename, F_OK) != 0) {
