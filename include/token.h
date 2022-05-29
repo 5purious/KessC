@@ -9,7 +9,8 @@ typedef enum {
     TT_MINUS,
     TT_STAR,
     TT_SLASH,
-    TT_INTLIT
+    TT_INTLIT,
+    TT_EOF
 } TOKEN_TYPE;
 
 

@@ -4,6 +4,8 @@
 #include <colors.h>
 #include <lexer.h>
 #include <token.h>
+#include <parser.h>
+#include <AST.h>
 
 
 static void start(const char* filename) {
@@ -15,6 +17,9 @@ static void start(const char* filename) {
     FILE* fp = fopen(filename, "r");
     lex_init(fp);
 
+    parse();
+
+    free_ast();
     fclose(fp);
 }
 

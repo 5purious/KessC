@@ -3,8 +3,10 @@
 #include <ctype.h>
 #include <string.h>
 
+// 2022 Ian Moffett
 
-static size_t line = 1;
+
+size_t line = 1;
 static size_t seekset_off = 0;
 static FILE* cur_fp = NULL;
 
@@ -19,6 +21,11 @@ static char next(void) {
     return ret;
 }
 
+// Lowers the file pointer.
+static void dec_fp(void) {
+    fseek(cur_fp, seekset_off -= 1, SEEK_SET);
+}
+
 
 static char skip(void) {
     char tmp = next();
@@ -28,12 +35,6 @@ static char skip(void) {
     }
 
     return tmp;
-}
-
-
-// Lowers the file pointer.
-static void dec_fp(void) {
-    fseek(cur_fp, seekset_off - 1, SEEK_SET);
 }
 
 
@@ -53,7 +54,7 @@ static int scan_int(char c) {
         c = next();
     }
 
-    dec_fp();
+    dec_fp();               // Non-integer character reached, put it back.
     return val;
 }
 
@@ -70,6 +71,7 @@ char scan(struct Token* tok) {
 
     switch (ch) {
         case EOF:
+            tok->type = TT_EOF;
             return 0;
         case '+':
             tok->type = TT_PLUS;
@@ -88,7 +90,6 @@ char scan(struct Token* tok) {
             if (isdigit(ch)) {
                 tok->type = TT_INTLIT;
                 tok->val_int = scan_int(ch);
-
             }
     }
 
