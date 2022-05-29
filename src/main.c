@@ -37,7 +37,11 @@ int main(int argc, const char** argv) {
     if (argc < 2) {
         printf(COLOR_ERROR "kcc: No input files!\n");
         return 1;
+    } else if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+        printf("Usage: kcc file.kessc\n");
+        printf("Flags:\n-S: Compiles only to assembly and returns the .s file\n");
     }
+
 
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] != '-') {
