@@ -27,7 +27,7 @@ static int alloc_reg(void) {
 // Frees a single register.
 static void free_reg(uint8_t reg) {
     if (reg > 4) return;
-    reg_bmp &= ~(1 << reg);
+    reg_bmp |= (1 << reg);
 }
 
 
