@@ -154,8 +154,33 @@ char scan(struct Token* tok) {
         case ';':
             tok->type = TT_SEMI;
             break;
-        case '=':
-            tok->type = TT_EQUALS;
+        case '<':
+            if ((ch = next()) == '=') {
+                tok->type = TT_LE;
+            } else {
+                dec_fp();
+                tok->type = TT_LT;
+            }
+            break;
+        case '>':
+            if ((ch = next()) == '=') {
+                tok->type = TT_GE;
+            } else {
+                dec_fp();
+                tok->type = TT_GT;
+            }
+        case '!':
+            if ((ch = next()) == '=') {          // '!='
+                tok->type = TT_NE;
+            } 
+            break;
+        case '=': 
+            if ((ch = next()) == '=') {           // '=='
+                tok->type = TT_CMP;
+            } else {                              // '='
+                dec_fp();
+                tok->type = TT_EQUALS;
+            }
             break;
         default:
             // Check if digit.

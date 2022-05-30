@@ -121,7 +121,7 @@ static void keyword(void) {
                 struct ASTNode* root = binexpr();
                 // Generate code to write out result.
                 codegen_print_int(interpret_ast(root, -1));         // Write our integer from expression or integer.
-            } else {
+            } else if (cur_token.type == TT_IDENT) {
                 codegen_print_int(rload_glob((char*)lexer_get_last_ident()));
                 scan(&cur_token);           // Eat token.
             }
@@ -166,7 +166,7 @@ static void keyword(void) {
              int id = locate_glob((char*)lexer_get_last_ident());
 
             if (id == -1) {
-                printf(COLOR_ERROR "Error: Referencing an undeclared variable on line %ld\n", get_line());
+                printf(COLOR_ERROR "Error: Referencing an undeclared identifier on line %ld\n", get_line());
                 clean_and_exit();
             }
             break;

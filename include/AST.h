@@ -9,6 +9,12 @@ typedef enum {
     A_SUB,
     A_MUL,
     A_DIV,
+    A_CMP,
+    A_NOT_EQ,
+    A_LT,
+    A_GT,
+    A_LE,
+    A_GE,
     A_INTLIT,
     A_LVIDENT,
     A_ASSIGN

@@ -5,22 +5,27 @@
 
 
 typedef enum {
-    TT_PLUS,                    // '+'
-    TT_MINUS,                   // '-'
-    TT_STAR,                    // '*'
-    TT_SLASH,                   // '/'
-    TT_INTLIT,                  // [0-9]
-    TT_PRINTS,                  // 'prints'
-    TT_LPAREN,                  // '('
-    TT_RPAREN,                  // ')'
-    TT_SEMI,                    // ';'
-    TT_EQUALS,                  // '='
-    TT_INT8,
+    TT_EOF,
+    TT_PLUS,
+    TT_MINUS,
+    TT_STAR,
+    TT_SLASH,
+    TT_CMP,
+    TT_NE,
+    TT_LT,
+    TT_GT,
+    TT_LE,
+    TT_GE,
+    TT_INTLIT,
+    TT_SEMI,
+    TT_EQUALS,
     TT_IDENT,
-    TT_INVALID, 
-    TT_EOF
+    TT_PRINTS,
+    TT_INT8,
+    TT_LPAREN,
+    TT_RPAREN,
+    TT_INVALID,
 } TOKEN_TYPE;
-
 
 
 struct Token {

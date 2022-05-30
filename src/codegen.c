@@ -6,6 +6,7 @@
 // 2022 Ian Moffett
 
 static char* regs[4] = {"%r8", "%r9", "%r10", "%r11"};
+static char* bregs[4] = {"%r8b", "%r9b", "%r10b", "%r11b"};
 static uint8_t reg_bmp = 0xF;
 static FILE* out = NULL;
 
@@ -128,6 +129,44 @@ static int rdiv(uint8_t r1, uint8_t r2) {
 }
 
 
+static int rcmp(uint8_t r1, uint8_t r2, char* how) {
+    fprintf(out, "\tcmpq\t%s, %s\n", regs[r2], regs[r1]);
+    fprintf(out, "\t%s\t%s\n", how, bregs[r2]);
+    fprintf(out, "\tandq\t$0xFF,%s\n", regs[r2]);
+    return r2;
+}
+
+
+static int requal(int r1, int r2) {
+    return rcmp(r1, r2, "sete");
+}
+
+
+static int rnotequal(int r1, int r2) {
+    return rcmp(r1, r2, "setne");
+}
+
+
+static int rlessthan(int r1, int r2) {
+    return rcmp(r1, r2, "setl");
+}
+
+
+static int rgreaterthan(int r1, int r2) {
+    return rcmp(r1, r2, "setg");
+}
+
+
+static int rlessequal(int r1, int r2) {
+    return rcmp(r1, r2, "setle");
+}
+
+
+static int rgreaterequal(int r1, int r2) {
+    return rcmp(r1, r2, "setge");
+}
+
+
 // Strores a global variable that is in a register
 // into a variable.
 static int rsglob(uint8_t r, const char* identifier) {
@@ -200,6 +239,18 @@ int interpret_ast(struct ASTNode* root, uint8_t reg) {
             }
         case A_ASSIGN:
             return rightreg;
+        case A_CMP:
+            return requal(leftreg, rightreg);
+        case A_NOT_EQ:
+            return rnotequal(leftreg, rightreg);
+        case A_LT:
+            return rlessthan(leftreg, rightreg);
+        case A_GT:
+            return rgreaterthan(leftreg, rightreg);
+        case A_LE:
+            return rlessequal(leftreg, rightreg);
+        case A_GE:
+            return rgreaterequal(leftreg, rightreg);
     }
 
     return 0;
