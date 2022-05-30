@@ -65,9 +65,9 @@ static void program_prologue() {
 
 static void epilogue(void) {
     fputs(
-            "movl\t$0, %eax\n"
-            "popq\t%rbp\n"
-            "retq\n", out);
+            "\tmovl\t$0, %eax\n"
+            "\tpopq\t%rbp\n"
+            "\tretq\n", out);
 }
 
 
