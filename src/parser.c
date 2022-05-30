@@ -111,7 +111,19 @@ static struct ASTNode* prints(void) {
     scan(&cur_token);
     match(TT_LPAREN, "'('");
     scan(&cur_token);
-    tree = binexpr();
+
+    if (cur_token.type != TT_IDENT)
+        tree = binexpr();
+    else {
+        tree = mkastleaf(A_INTLIT, rload_glob((char*)lexer_get_last_ident()));
+        scan(&cur_token);
+        tree = mkastunary(A_PRINTVAR, tree, 0);
+        // Check if rparen.
+        match(TT_RPAREN, "')");
+        end_statement();
+        return tree;
+    }
+
     // Check if rparen.
     match(TT_RPAREN, "')");
     end_statement();

@@ -328,8 +328,12 @@ int interpret_ast(struct ASTNode* root, uint8_t reg, int parent_ast_top) {
             }
 
             break;
+        case A_PRINTVAR:
+            codegen_print_int(root->left->val_int);
+            break;
         case A_PRINT:
             codegen_print_int(leftreg);
+            break;
         case A_INTLIT:
             return rload(root->val_int);
         case A_LVIDENT:

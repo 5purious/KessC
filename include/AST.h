@@ -21,6 +21,7 @@ typedef enum {
     A_PRINT,
     A_GLUE,
     A_IF,
+    A_PRINTVAR,
 } AST_NODE_TYPE;
 
 
