@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <symbol.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <colors.h>
@@ -17,22 +18,37 @@
 uint8_t only_assembly = 0;
 uint8_t error = 0;
 
+
+FILE* fp;
+
+// Used for error handling.
+void clean_and_exit(void) {
+    free_ast();
+    fclose(fp);
+    codegen_done();
+    symbol_tbl_free();
+    exit(1);
+
+}
+
+
 static void start(const char* filename) {
     if (access(filename, F_OK) != 0) {
         printf(COLOR_ERROR "kcc: Input file \"%s\" does not exist!\n", filename);
         exit(1);
     }
 
-    FILE* fp = fopen(filename, "r");
+    fp = fopen(filename, "r");
     lex_init(fp);
 
+    symbol_tbl_init();
     parse();
 
     free_ast();
     fclose(fp);
     codegen_done();
 
-    if (error) exit(1);
+    symbol_tbl_free();
 }
 
 

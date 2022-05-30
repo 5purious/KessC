@@ -10,9 +10,15 @@
 #define MAX_KEYWORD_LENGTH 45
 
 
-size_t line = 0;
+static size_t line = 1;
 static size_t seekset_off = 0;
 static FILE* cur_fp = NULL;
+static const char* last_ident = NULL;
+
+
+size_t get_line(void) {
+    return line == 1 ? 1 : line - 1;
+}
 
 
 static char next(void) {
@@ -88,6 +94,12 @@ void lex_init(FILE* fp) {
 }
 
 
+const char* lexer_get_last_ident(void) {
+    return last_ident;
+}
+
+
+
 /*
  * @pkw: Possible key word.
  *
@@ -95,10 +107,13 @@ void lex_init(FILE* fp) {
 static TOKEN_TYPE check_keyword(char* pkw) {
     if (strcmp(pkw, "prints") == 0) {
         return TT_PRINTS;
+    } else if (strcmp(pkw, "int8") == 0) {
+        return TT_INT8;
     }
 
-    // Didn't find a keyword.
-    return TT_INVALID;
+    // Didn't find a keyword, must be an indetifier.
+    last_ident = pkw;
+    return TT_IDENT;
 }
 
 
@@ -139,6 +154,9 @@ char scan(struct Token* tok) {
         case ';':
             tok->type = TT_SEMI;
             break;
+        case '=':
+            tok->type = TT_EQUALS;
+            break;
         default:
             // Check if digit.
             if (isdigit(ch)) {
@@ -154,14 +172,7 @@ char scan(struct Token* tok) {
                 return 0;
             }
 
-            // No keyword was found.
-            if ((tok->type = check_keyword(possible_keywrd)) == TT_INVALID) {
-                extern uint8_t error;
-                error = 1;
-                printf(COLOR_ERROR "Error: Invalid keyword on line %ld\n", line);
-                tok->type = TT_INVALID;
-                return 0;
-            }
+            tok->type = check_keyword(possible_keywrd);
 
             break;
     }

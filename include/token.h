@@ -14,6 +14,9 @@ typedef enum {
     TT_LPAREN,                  // '('
     TT_RPAREN,                  // ')'
     TT_SEMI,                    // ';'
+    TT_EQUALS,                  // '='
+    TT_INT8,
+    TT_IDENT,
     TT_INVALID, 
     TT_EOF
 } TOKEN_TYPE;

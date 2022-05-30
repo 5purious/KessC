@@ -11,5 +11,6 @@
 char scan(struct Token* tok);
 void lex_init(FILE* fp);
 uint8_t is_tokens_left(void);
-
+size_t get_line(void);
+const char* lexer_get_last_ident(void);
 #endif
