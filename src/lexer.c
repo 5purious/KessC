@@ -129,6 +129,9 @@ char scan(struct Token* tok) {
         case ')':
             tok->type = TT_RPAREN;
             break;
+        case ';':
+            tok->type = TT_SEMI;
+            break;
         default:
             // Check if digit.
             if (isdigit(ch)) {

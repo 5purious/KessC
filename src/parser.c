@@ -73,6 +73,13 @@ static void match(TOKEN_TYPE t, char* what) {
 }
 
 
+static void end_statemenmt(void) {
+    scan(&cur_token);
+    match(TT_SEMI, "';'");            // Check if semicolon.
+    scan(&cur_token);
+}
+
+
 static void keyword(void) {
     switch (cur_token.type) {
         case TT_PRINTS:
@@ -91,6 +98,7 @@ static void keyword(void) {
 
             // Check if rparen.
             match(TT_RPAREN, "')");
+            end_statemenmt();
             break;
         default: break;
     }
