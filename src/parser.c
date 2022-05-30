@@ -18,6 +18,7 @@
 static struct Token cur_token;
 
 void clean_and_exit(void);
+static struct ASTNode* compound_statement(void);
 
 
 // Parse a primary factor.
@@ -134,37 +135,6 @@ static struct ASTNode* prints(void) {
 }
 
 
-// Parse a compund statement and
-// return it's AST.
-struct ASTNode* compound_statement(void) {
-    struct ASTNode* left = NULL;
-    struct ASTNode* tree;
-
-    // We need a left curly brace.
-    match(TT_LBRACE, "'{'");
-    scan(&cur_token);
-
-    while (1) {
-       switch (cur_token.type) {
-           case TT_PRINTS:
-               tree = prints();
-               break;
-            case TT_RBRACE:
-               scan(&cur_token);
-               return left;
-            default:
-               printf(COLOR_ERROR "Syntax error on line %ld\n", get_line());
-               clean_and_exit();
-       }
-
-        if (tree && left == NULL)
-            left = tree;
-        else
-            left = mkastnode(A_GLUE, left, NULL, tree, 0);
-    }
-}
-
-
 static struct ASTNode* if_statement(void) {
     struct ASTNode *condAST, *trueAST = NULL;
 
@@ -189,6 +159,40 @@ static struct ASTNode* if_statement(void) {
 
 
     return mkastnode(A_IF, condAST, trueAST, NULL, 0);
+}
+
+
+// Parse a compund statement and
+// return it's AST.
+struct ASTNode* compound_statement(void) {
+    struct ASTNode* left = NULL;
+    struct ASTNode* tree;
+
+    // We need a left curly brace.
+    match(TT_LBRACE, "'{'");
+    scan(&cur_token);
+
+    while (1) {
+       switch (cur_token.type) {
+           case TT_PRINTS:
+               tree = prints();
+               break;
+            case TT_IF:
+               tree = if_statement();
+               break;
+            case TT_RBRACE:
+               scan(&cur_token);
+               return left;
+            default:
+               printf(COLOR_ERROR "Syntax error on line %ld\n", get_line());
+               clean_and_exit();
+       }
+
+        if (tree && left == NULL)
+            left = tree;
+        else
+            left = mkastnode(A_GLUE, left, NULL, tree, 0);
+    }
 }
 
 
