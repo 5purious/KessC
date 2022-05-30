@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 
-static struct SymbolTable globl_sym_tbl[NSYMBOLS];
+struct SymbolTable globl_sym_tbl[NSYMBOLS];
 static int globs = 0;
 
 

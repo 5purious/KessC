@@ -9,7 +9,9 @@ typedef enum {
     A_SUB,
     A_MUL,
     A_DIV,
-    A_INTLIT
+    A_INTLIT,
+    A_LVIDENT,
+    A_ASSIGN
 } AST_NODE_TYPE;
 
 
@@ -18,7 +20,11 @@ struct ASTNode {
     AST_NODE_TYPE op;
     struct ASTNode* left;
     struct ASTNode* right;
-    int val_int;
+
+    union {
+        int val_int;
+        int symbol_id;          // For A_IDENT.
+    };
 };
 
 

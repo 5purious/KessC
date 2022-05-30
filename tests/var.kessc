@@ -1,1 +1,2 @@
-int8 = 2;
+int8 a = 2+1;
+prints(a);

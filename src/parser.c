@@ -38,6 +38,16 @@ static struct ASTNode* primary() {
 
 }
 
+static void match(TOKEN_TYPE t, char* what) {
+    extern uint8_t error;
+
+    if (cur_token.type != t) {
+        printf(COLOR_ERROR "Error: %s expected on line %ld\n", what, get_line());
+        error = 1;
+        clean_and_exit();
+    }
+}
+
 
 // Return an AST with a root binary operator.
 static struct ASTNode* binexpr() { 
@@ -49,8 +59,10 @@ static struct ASTNode* binexpr() {
     if (left == NULL) return NULL;
 
     // Just return left if there is no tokens left.
-    if (cur_token.type == TT_EOF || cur_token.type == TT_RPAREN) {
+    if (cur_token.type == TT_RPAREN || cur_token.type == TT_SEMI) {
         return left;
+    } else if (cur_token.type == TT_EOF) {
+        match(TT_SEMI, "';'");                    // This will automatically fail.
     }
 
     // Convert token into a node type.
@@ -67,21 +79,30 @@ static struct ASTNode* binexpr() {
 }
 
 
-static void match(TOKEN_TYPE t, char* what) {
-    extern uint8_t error;
-
-    if (cur_token.type != t) {
-        printf(COLOR_ERROR "Error: %s expected on line %ld\n", what, get_line());
-        error = 1;
-        clean_and_exit();
-    }
-}
-
 
 static void end_statemenmt(void) {
     scan(&cur_token);
     match(TT_SEMI, "';'");            // Check if semicolon.
     scan(&cur_token);
+}
+
+
+static void assignment(void) {
+    struct ASTNode *left, *right, *tree;
+
+    int id = locate_glob((char*)lexer_get_last_ident());
+
+    if (id == -1) {
+        printf(COLOR_ERROR "Error: Trying to assign to an undeclared variable on line %ld\n", get_line());
+        clean_and_exit();
+    }
+
+    right = mkastleaf(A_LVIDENT, id);
+    match(TT_EQUALS, "'='");
+    scan(&cur_token);
+    left = binexpr();
+    tree = mkastnode(A_ASSIGN, left, right, 0);
+    interpret_ast(tree, -1);
 }
 
 
@@ -95,14 +116,19 @@ static void keyword(void) {
             // Scan in another token.
             scan(&cur_token);
 
-            // Read in an expression.
-            struct ASTNode* root = binexpr();
-
-            // Generate code to write out result.
-            codegen_print_int(interpret_ast(root));         // Write our integer from expression or integer.
+            if (cur_token.type != TT_IDENT) {
+                // Read in an expression.
+                struct ASTNode* root = binexpr();
+                // Generate code to write out result.
+                codegen_print_int(interpret_ast(root, -1));         // Write our integer from expression or integer.
+            } else {
+                codegen_print_int(rload_glob((char*)lexer_get_last_ident()));
+                scan(&cur_token);           // Eat token.
+            }
 
             // Check if rparen.
             match(TT_RPAREN, "')");
+            end_statemenmt();
             break;
         case TT_INT8:
             scan(&cur_token);
@@ -116,21 +142,36 @@ static void keyword(void) {
 
             // Submit symbol.
             add_glob(glob_ident);
+            scan(&cur_token);
+
+            // Make space for a global symbol (1 byte).
+            rmkglob_sym((char*)lexer_get_last_ident(), 1);
+
+            // Check if we are defining or just declaring.
+            if (cur_token.type == TT_EQUALS) {
+                assignment();
+            } else {
+                // We are ending statmenet up here
+                // and not at the end of
+                // this case because
+                // assignment() calls binexpr() which
+                // does it's own check or semis.
+                end_statemenmt();
+            }
 
             // Eat token.
             scan(&cur_token);
+            break;
+        case TT_IDENT:
+             int id = locate_glob((char*)lexer_get_last_ident());
 
-            // Assignment operator should be next.
-            match(TT_EQUALS, "'='");
-            scan(&cur_token);
-
-            // Integer should be next.
-            match(TT_INTLIT, "Integer");
+            if (id == -1) {
+                printf(COLOR_ERROR "Error: Referencing an undeclared variable on line %ld\n", get_line());
+                clean_and_exit();
+            }
             break;
         default: break;
     }
-
-    end_statemenmt();
 }
 
 

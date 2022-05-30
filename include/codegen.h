@@ -8,5 +8,8 @@
 void codegen_init(void);
 void codegen_done(void);
 void codegen_print_int(uint8_t reg);
-int interpret_ast(struct ASTNode* root);
+int interpret_ast(struct ASTNode* root, uint8_t reg);
+void rmkglob_sym(char* symbol, uint8_t sz_bytes);
+uint8_t rload_glob(char* identifier);
+
 #endif
