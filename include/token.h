@@ -11,6 +11,8 @@ typedef enum {
     TT_SLASH,
     TT_INTLIT,
     TT_PRINTS,
+    TT_LPAREN,
+    TT_RPAREN,
     TT_INVALID,
     TT_EOF
 } TOKEN_TYPE;

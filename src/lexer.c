@@ -10,16 +10,13 @@
 #define MAX_KEYWORD_LENGTH 45
 
 
-size_t line = 1;
+size_t line = 0;
 static size_t seekset_off = 0;
 static FILE* cur_fp = NULL;
 
 
 static char next(void) {
     char ret = fgetc(cur_fp);
-
-    if (ret == '\n') 
-        ++line;
 
     ++seekset_off;
     return ret;
@@ -35,6 +32,8 @@ static char skip(void) {
     char tmp = next();
 
     while (tmp == ' ' || tmp == '\t' || tmp == '\r' || tmp == '\n' || tmp == '\f') {
+        if (tmp == '\n') ++line;
+
         tmp = next();
     }
 
@@ -123,6 +122,12 @@ char scan(struct Token* tok) {
             break;
         case '/':
             tok->type = TT_SLASH;
+            break;
+        case '(':
+            tok->type = TT_LPAREN;
+            break;
+        case ')':
+            tok->type = TT_RPAREN;
             break;
         default:
             // Check if digit.

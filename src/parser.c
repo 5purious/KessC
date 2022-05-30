@@ -44,7 +44,7 @@ static struct ASTNode* binexpr() {
     if (left == NULL) return NULL;
 
     // Just return left if there is no tokens left.
-    if (cur_token.type == TT_EOF) {
+    if (cur_token.type == TT_EOF || cur_token.type == TT_RPAREN) {
         return left;
     }
 
@@ -77,9 +77,20 @@ static void keyword(void) {
     switch (cur_token.type) {
         case TT_PRINTS:
             scan(&cur_token);
-            match(TT_INTLIT, "Error: Integer literal");
+            // Check if we have an open paren.
+            match(TT_LPAREN, "'('");
+
+            // Scan in another token.
+            scan(&cur_token);
+
+            // Read in an expression.
             struct ASTNode* root = binexpr();
+
+            // Generate code to write out result.
             codegen_print_int(interpret_ast(root));         // Write our integer from expression or integer.
+
+            // Check if rparen.
+            match(TT_RPAREN, "')");
             break;
         default: break;
     }
@@ -90,4 +101,7 @@ void parse(void) {
     codegen_init();
     scan(&cur_token);
     keyword();
+    extern uint8_t error;
+    
+    if (error) return;
 }
