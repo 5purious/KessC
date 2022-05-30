@@ -112,6 +112,7 @@ static struct ASTNode* prints(void) {
     match(TT_LPAREN, "'('");
     scan(&cur_token);
 
+    // Check if not identifier.
     if (cur_token.type != TT_IDENT)
         tree = binexpr();
     else {
