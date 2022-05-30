@@ -19,7 +19,7 @@ AST_NODE_TYPE arithop(TOKEN_TYPE token) {
         case TT_INTLIT:
             return A_INTLIT;
         default:
-            printf("Unknown type in %s.\n", __func__);
+            printf("Unknown type %d in %s.\n", token, __func__);
             exit(1);
     }
 }
