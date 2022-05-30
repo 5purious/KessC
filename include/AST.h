@@ -18,7 +18,9 @@ typedef enum {
     A_INTLIT,
     A_LVIDENT,
     A_ASSIGN,
-    A_PRINT
+    A_PRINT,
+    A_GLUE,
+    A_IF,
 } AST_NODE_TYPE;
 
 
@@ -26,6 +28,7 @@ typedef enum {
 struct ASTNode {
     AST_NODE_TYPE op;
     struct ASTNode* left;
+    struct ASTNode* mid;
     struct ASTNode* right;
 
     union {
@@ -35,7 +38,7 @@ struct ASTNode {
 };
 
 
-struct ASTNode* mkastnode(AST_NODE_TYPE op, struct ASTNode* left, struct ASTNode* right, int val_int);
+struct ASTNode* mkastnode(AST_NODE_TYPE op, struct ASTNode* left, struct ASTNode* mid, struct ASTNode* right, int val_int);
 struct ASTNode* mkastleaf(AST_NODE_TYPE op, int val_int);
 struct ASTNode* mkastunary(AST_NODE_TYPE op, struct ASTNode* left, int val_int);
 void free_ast(void);

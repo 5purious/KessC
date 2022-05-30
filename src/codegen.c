@@ -2,6 +2,8 @@
 #include <symbol.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <colors.h>
 
 // 2022 Ian Moffett
 
@@ -11,6 +13,12 @@ static uint8_t reg_bmp = 0xF;
 static FILE* out = NULL;
 
 #define ASM_OUT "/tmp/kcc_" __TIME__ ".s"
+
+void clean_and_exit(void);
+
+
+// Jump types.
+static char* jmps[] = {"jne", "je", "jge", "jle", "jg", "jl"};
 
 
 // If a register is free, the bit is set, otherwise clear.
@@ -175,6 +183,34 @@ static int rsglob(uint8_t r, const char* identifier) {
 }
 
 
+static size_t gen_label(void) {
+    static int id = 1;
+    return id++;
+}
+
+
+static void rlabel(int l) {
+    fprintf(out, "_%d:\n", l);
+}
+
+static int gencode_if(struct ASTNode* node) {
+    int lFalse = gen_label();
+
+    // Generate condition code followed
+    // by a jump to false label.
+    interpret_ast(node->left, lFalse, node->op);
+    freeall_regs();
+
+    // Generate true compound statement.
+    interpret_ast(node->mid, -1, node->op);
+    freeall_regs();
+    
+    rlabel(lFalse);
+
+    return -1;
+}
+
+
 // Make space for a global symbol.
 void rmkglob_sym(char* symbol, uint8_t sz_bytes) {
     fprintf(out, "\t.comm\t%s,%d,%d\n", symbol, sz_bytes, sz_bytes);
@@ -199,15 +235,43 @@ uint8_t rload_glob(char* identifier) {
 }
 
 
-int interpret_ast(struct ASTNode* root, uint8_t reg) {
-    int leftreg, rightreg;
+static int compare_n_jmp(int ast_op, uint8_t r1, uint8_t r2, size_t label) {
+    if (ast_op < A_CMP || ast_op > A_GE) {
+        printf(COLOR_ERROR "Bad ast_op in compare_n_jmp()\n");
+        fclose(out);
+        clean_and_exit();
+    }
 
+    fprintf(out, "\tcmpq\t%s, %s\n", regs[r2], regs[r1]);
+    fprintf(out, "\t%s\t_%ld\n", jmps[ast_op - A_CMP], label);
+    freeall_regs();
+    return -1;
+}
+
+
+int interpret_ast(struct ASTNode* root, uint8_t reg, int parent_ast_top) {
+    int leftreg, rightreg;
+    
+    switch (root->op) {
+        case A_IF:
+            return gencode_if(root);
+        case A_GLUE:
+            // Handle each child statement, and free 
+            // the registers after each child.
+            interpret_ast(root->left, -1, root->op);
+            freeall_regs();
+            interpret_ast(root->right, -1, root->op);
+            freeall_regs();
+            return -1;
+        default: break;
+    }
+    
     // Get left, right sub-tree values.
     if (root->left)
-        leftreg = interpret_ast(root->left, -1);
+        leftreg = interpret_ast(root->left, -1, root->op);
 
     if (root->right)
-        rightreg = interpret_ast(root->right, leftreg);
+        rightreg = interpret_ast(root->right, leftreg, root->op);
 
     switch (root->op) {
         case A_ADD:
@@ -230,6 +294,42 @@ int interpret_ast(struct ASTNode* root, uint8_t reg) {
                 return rdiv(leftreg, rightreg);
             }
             break;
+        case A_CMP:
+        case A_NOT_EQ:
+        case A_LT:
+        case A_GT:
+        case A_LE:
+        case A_GE:
+            /*
+             *  If parent_ast_top is an IF statement we will
+             *  compare and jump, otherwise we will re-check the
+             *  operators and set whatever the result is.
+             *
+             */
+
+            if (parent_ast_top == A_IF)
+                return compare_n_jmp(root->op,leftreg, rightreg, reg);
+            else {
+                switch (root->op) {
+                    case A_CMP:
+                        return requal(leftreg, rightreg);
+                    case A_NOT_EQ:
+                        return rnotequal(leftreg, rightreg);
+                    case A_LT:
+                        return rlessthan(leftreg, rightreg);
+                    case A_GT:
+                        return rgreaterthan(leftreg, rightreg);
+                    case A_LE:
+                        return rlessequal(leftreg, rightreg);
+                    case A_GE:
+                        return rgreaterequal(leftreg, rightreg);
+                    default: break;
+                }
+            }
+
+            break;
+        case A_PRINT:
+            codegen_print_int(leftreg);
         case A_INTLIT:
             return rload(root->val_int);
         case A_LVIDENT:
@@ -238,21 +338,9 @@ int interpret_ast(struct ASTNode* root, uint8_t reg) {
                 return rsglob(reg, globl_sym_tbl[root->symbol_id].name);
             }
         case A_ASSIGN:
-            return rightreg;
-        case A_CMP:
-            return requal(leftreg, rightreg);
-        case A_NOT_EQ:
-            return rnotequal(leftreg, rightreg);
-        case A_LT:
-            return rlessthan(leftreg, rightreg);
-        case A_GT:
-            return rgreaterthan(leftreg, rightreg);
-        case A_LE:
-            return rlessequal(leftreg, rightreg);
-        case A_GE:
-            return rgreaterequal(leftreg, rightreg);
-        case A_PRINT:
-            codegen_print_int(leftreg);
+            return rightreg; 
+        default:
+            return 0;
     }
 
     return 0;

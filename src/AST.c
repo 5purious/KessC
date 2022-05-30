@@ -10,7 +10,7 @@ static struct ASTNode** nodes_allocated = NULL;
 static size_t alloc_idx = 0;
 
 
-struct ASTNode* mkastnode(AST_NODE_TYPE op, struct ASTNode* left, struct ASTNode* right, int val_int) {
+struct ASTNode* mkastnode(AST_NODE_TYPE op, struct ASTNode* left, struct ASTNode* mid, struct ASTNode* right, int val_int) {
     if (nodes_allocated == NULL) {
         nodes_allocated = malloc(sizeof(struct ASTNode));
     } else {
@@ -27,17 +27,18 @@ struct ASTNode* mkastnode(AST_NODE_TYPE op, struct ASTNode* left, struct ASTNode
 
     node->op = op;
     node->left = left;
+    node->mid = mid;
     node->right = right;
     node->val_int = val_int;
     return node;
 }
 
 struct ASTNode* mkastleaf(AST_NODE_TYPE op, int val_int) {
-    return mkastnode(op, NULL, NULL, val_int);
+    return mkastnode(op, NULL, NULL, NULL, val_int);
 }
 
 struct ASTNode* mkastunary(AST_NODE_TYPE op, struct ASTNode* left, int val_int) {
-    return mkastnode(op, left, NULL, val_int);
+    return mkastnode(op, left, NULL, NULL, val_int);
 }
 
 

@@ -59,7 +59,7 @@ static struct ASTNode* binexpr() {
     if (left == NULL) return NULL;
 
     // Just return left if there is no tokens left.
-    if (cur_token.type == TT_RPAREN || cur_token.type == TT_SEMI) {
+    if (cur_token.type == TT_RPAREN || cur_token.type == TT_SEMI || cur_token.type == TT_LBRACE) {
         return left;
     } else if (cur_token.type == TT_EOF) {
         match(TT_SEMI, "';'");                    // This will automatically fail.
@@ -73,14 +73,14 @@ static struct ASTNode* binexpr() {
     right = binexpr(cur_token);
 
     // Now build the tree.
-    n = mkastnode(node_type, left, right, 0);
+    n = mkastnode(node_type, left, NULL, right, 0);
     return n;
 
 }
 
 
 
-static void end_statemenmt(void) {
+static void end_statement(void) {
     scan(&cur_token);
     match(TT_SEMI, "';'");            // Check if semicolon.
     scan(&cur_token);
@@ -101,8 +101,8 @@ static void assignment(void) {
     match(TT_EQUALS, "'='");
     scan(&cur_token);
     left = binexpr();
-    tree = mkastnode(A_ASSIGN, left, right, 0);
-    interpret_ast(tree, -1);
+    tree = mkastnode(A_ASSIGN, left, NULL, right, 0);
+    interpret_ast(tree, -1, -1);
 }
 
 static struct ASTNode* prints(void) {
@@ -114,17 +114,75 @@ static struct ASTNode* prints(void) {
     tree = binexpr();
     // Check if rparen.
     match(TT_RPAREN, "')");
-    end_statemenmt();
+    end_statement();
     tree = mkastunary(A_PRINT, tree, 0);
     return tree;
 
 }
 
 
+// Parse a compund statement and
+// return it's AST.
+struct ASTNode* compound_statement(void) {
+    struct ASTNode* left = NULL;
+    struct ASTNode* tree;
+
+    // We need a left curly brace.
+    match(TT_LBRACE, "'{'");
+    scan(&cur_token);
+
+    while (1) {
+       switch (cur_token.type) {
+           case TT_PRINTS:
+               tree = prints();
+               break;
+            case TT_RBRACE:
+               scan(&cur_token);
+               return left;
+            default:
+               printf(COLOR_ERROR "Syntax error on line %ld\n", get_line());
+               clean_and_exit();
+       }
+
+        if (tree && left == NULL)
+            left = tree;
+        else
+            left = mkastnode(A_GLUE, left, NULL, tree, 0);
+    }
+}
+
+
+static struct ASTNode* if_statement(void) {
+    struct ASTNode *condAST, *trueAST = NULL;
+
+    // Make sure we have lparen.
+    scan(&cur_token);
+    match(TT_LPAREN, "'('");
+    scan(&cur_token);
+
+    condAST = binexpr();
+
+    if (condAST->op < A_CMP || condAST->op > A_GE) {
+        printf(COLOR_ERROR "ERROR: Bad operator in if statement condition on line %ld\n", get_line());
+        clean_and_exit();
+    } 
+
+    // Check for rparen.
+    match(TT_RPAREN, "')");
+    scan(&cur_token);
+
+    // Get AST for compound statement.
+    trueAST = compound_statement();
+
+
+    return mkastnode(A_IF, condAST, trueAST, NULL, 0);
+}
+
+
 static void keyword(void) {
     switch (cur_token.type) {
         case TT_PRINTS:
-            interpret_ast(prints(), -1);
+            interpret_ast(prints(), -1, -1);
             break;
         case TT_INT8:
             scan(&cur_token);
@@ -152,7 +210,7 @@ static void keyword(void) {
                 // this case because
                 // assignment() calls binexpr() which
                 // does it's own check or semis.
-                end_statemenmt();
+                end_statement();
             }
 
             // Eat token.
@@ -165,6 +223,9 @@ static void keyword(void) {
                 printf(COLOR_ERROR "Error: Referencing an undeclared identifier on line %ld\n", get_line());
                 clean_and_exit();
             }
+            break;
+        case TT_IF:
+            interpret_ast(if_statement(), -1, -1);
             break;
         default: break;
     }
