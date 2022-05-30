@@ -14,7 +14,7 @@
 #endif
 
 uint8_t only_assembly = 0;
-
+uint8_t error = 0;
 
 static void start(const char* filename) {
     if (access(filename, F_OK) != 0) {
@@ -29,6 +29,8 @@ static void start(const char* filename) {
 
     free_ast();
     fclose(fp);
+
+    if (error) exit(1);
 }
 
 

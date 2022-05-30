@@ -6,6 +6,7 @@
 #include <colors.h>
 #include <codegen.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,7 +27,7 @@ static struct ASTNode* primary() {
         default:
             if (cur_token.type == TT_EOF) return NULL;
             extern size_t line;
-            printf(COLOR_ERROR "Syntax error on line %ld\n", line);
+            printf(COLOR_ERROR "Error: Syntax error on line %ld\n", line);
             return NULL;
     }
 
@@ -61,8 +62,32 @@ static struct ASTNode* binexpr() {
 }
 
 
+static void match(TOKEN_TYPE t, char* what) {
+    extern size_t line;
+    extern uint8_t error;
+
+    if (cur_token.type != t) {
+        printf(COLOR_ERROR "Error: %s expected on line %ld\n", what, line);
+        error = 1;
+    }
+}
+
+
+static void keyword(void) {
+    switch (cur_token.type) {
+        case TT_PRINTS:
+            scan(&cur_token);
+            match(TT_INTLIT, "Error: Integer literal");
+            break;
+        default: break;
+    }
+}
+
+
 void parse(void) {
     scan(&cur_token);
+    match(TT_PRINTS, "prints");      // Ensure there is a print statement first.
+    keyword();
     struct ASTNode* root = binexpr();
     gencode(root);
 }

@@ -10,6 +10,8 @@ typedef enum {
     TT_STAR,
     TT_SLASH,
     TT_INTLIT,
+    TT_PRINTS,
+    TT_INVALID,
     TT_EOF
 } TOKEN_TYPE;
 

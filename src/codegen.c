@@ -181,6 +181,10 @@ static int interpret_ast(struct ASTNode* root) {
 
 
 void gencode(struct ASTNode* node) {
+    extern uint8_t error;
+
+    if (error) return;
+
     out = fopen(ASM_OUT, "w");
     program_prologue(); 
     interpret_ast(node);
