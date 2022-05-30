@@ -5,15 +5,16 @@
 
 
 typedef enum {
-    TT_PLUS,
-    TT_MINUS,
-    TT_STAR,
-    TT_SLASH,
-    TT_INTLIT,
-    TT_PRINTS,
-    TT_LPAREN,
-    TT_RPAREN,
-    TT_INVALID,
+    TT_PLUS,                    // '+'
+    TT_MINUS,                   // '-'
+    TT_STAR,                    // '*'
+    TT_SLASH,                   // '/'
+    TT_INTLIT,                  // [0-9]
+    TT_PRINTS,                  // 'prints'
+    TT_LPAREN,                  // '('
+    TT_RPAREN,                  // ')'
+    TT_SEMI,                    // ';'
+    TT_INVALID, 
     TT_EOF
 } TOKEN_TYPE;
 
