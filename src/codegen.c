@@ -1,7 +1,8 @@
 #include <codegen.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// 2022 Ian Moffett
 
 static char* regs[4] = {"%r8", "%r9", "%r10", "%r11"};
 static uint8_t reg_bmp = 0xF;
@@ -126,14 +127,14 @@ static int rdiv(uint8_t r1, uint8_t r2) {
 
 // Prints an integer that is inside
 // of a register.
-static void print_int(int reg) {
+void codegen_print_int(uint8_t reg) {
     fprintf(out, "\tmovq\t%s, %%rdi\n", regs[reg]);
     fprintf(out, "\tcall\tprintint\n");
     free_reg(reg);
 }
 
 
-static int interpret_ast(struct ASTNode* root) {
+int interpret_ast(struct ASTNode* root) {
     int leftreg, rightreg;
 
     // Get left, right sub-tree values.
@@ -172,14 +173,16 @@ static int interpret_ast(struct ASTNode* root) {
 }
 
 
-void gencode(struct ASTNode* node) {
+void codegen_init(void) {
     extern uint8_t error;
-
     if (error) return;
-
     out = fopen(ASM_OUT, "w");
     program_prologue(); 
-    print_int(interpret_ast(node));
+ 
+}
+
+
+void codegen_done(void) {
     epilogue();
     fclose(out);
     

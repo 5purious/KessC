@@ -2,9 +2,11 @@
 #define CODEGEN_H
 
 #include <AST.h>
+#include <stdint.h>
 
 
-void gencode(struct ASTNode* node);
-
-
+void codegen_init(void);
+void codegen_done(void);
+void codegen_print_int(uint8_t reg);
+int interpret_ast(struct ASTNode* root);
 #endif

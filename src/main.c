@@ -7,6 +7,7 @@
 #include <lexer.h>
 #include <token.h>
 #include <parser.h>
+#include <codegen.h>
 #include <AST.h>
 
 #if defined(_WIN32) || defined(WIN32)
@@ -29,6 +30,7 @@ static void start(const char* filename) {
 
     free_ast();
     fclose(fp);
+    codegen_done();
 
     if (error) exit(1);
 }
