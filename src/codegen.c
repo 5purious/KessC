@@ -251,6 +251,8 @@ int interpret_ast(struct ASTNode* root, uint8_t reg) {
             return rlessequal(leftreg, rightreg);
         case A_GE:
             return rgreaterequal(leftreg, rightreg);
+        case A_PRINT:
+            codegen_print_int(leftreg);
     }
 
     return 0;

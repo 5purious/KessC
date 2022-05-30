@@ -105,30 +105,26 @@ static void assignment(void) {
     interpret_ast(tree, -1);
 }
 
+static struct ASTNode* prints(void) {
+    struct ASTNode* tree; 
+
+    scan(&cur_token);
+    match(TT_LPAREN, "'('");
+    scan(&cur_token);
+    tree = binexpr();
+    // Check if rparen.
+    match(TT_RPAREN, "')");
+    end_statemenmt();
+    tree = mkastunary(A_PRINT, tree, 0);
+    return tree;
+
+}
+
 
 static void keyword(void) {
     switch (cur_token.type) {
         case TT_PRINTS:
-            scan(&cur_token);
-            // Check if we have an open paren.
-            match(TT_LPAREN, "'('");
-
-            // Scan in another token.
-            scan(&cur_token);
-
-            if (cur_token.type != TT_IDENT) {
-                // Read in an expression.
-                struct ASTNode* root = binexpr();
-                // Generate code to write out result.
-                codegen_print_int(interpret_ast(root, -1));         // Write our integer from expression or integer.
-            } else if (cur_token.type == TT_IDENT) {
-                codegen_print_int(rload_glob((char*)lexer_get_last_ident()));
-                scan(&cur_token);           // Eat token.
-            }
-
-            // Check if rparen.
-            match(TT_RPAREN, "')");
-            end_statemenmt();
+            interpret_ast(prints(), -1);
             break;
         case TT_INT8:
             scan(&cur_token);

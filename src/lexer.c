@@ -109,6 +109,8 @@ static TOKEN_TYPE check_keyword(char* pkw) {
         return TT_PRINTS;
     } else if (strcmp(pkw, "int8") == 0) {
         return TT_INT8;
+    } else if (strcmp(pkw, "if") == 0) {
+        return TT_IF;
     }
 
     // Didn't find a keyword, must be an indetifier.
@@ -150,6 +152,12 @@ char scan(struct Token* tok) {
             break;
         case ')':
             tok->type = TT_RPAREN;
+            break;
+        case '{':
+            tok->type = TT_LBRACE;
+            break;
+        case '}':
+            tok->type = TT_RBRACE;
             break;
         case ';':
             tok->type = TT_SEMI;
