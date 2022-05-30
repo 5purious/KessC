@@ -78,6 +78,8 @@ static void keyword(void) {
         case TT_PRINTS:
             scan(&cur_token);
             match(TT_INTLIT, "Error: Integer literal");
+            struct ASTNode* root = binexpr();
+            codegen_print_int(interpret_ast(root));         // Write our integer from expression or integer.
             break;
         default: break;
     }
@@ -85,9 +87,7 @@ static void keyword(void) {
 
 
 void parse(void) {
+    codegen_init();
     scan(&cur_token);
-    match(TT_PRINTS, "prints");      // Ensure there is a print statement first.
     keyword();
-    struct ASTNode* root = binexpr();
-    gencode(root);
 }
