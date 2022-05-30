@@ -102,6 +102,13 @@ static TOKEN_TYPE check_keyword(char* pkw) {
 }
 
 
+uint8_t is_tokens_left(void) {
+    uint8_t ret = next() != EOF;
+    dec_fp();
+    return ret;
+}
+
+
 // If this returns zero there are no tokens left.
 char scan(struct Token* tok) {
     // Get next character.

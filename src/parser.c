@@ -107,9 +107,14 @@ static void keyword(void) {
 
 void parse(void) {
     codegen_init();
+
     scan(&cur_token);
-    keyword();
+
     extern uint8_t error;
-    
-    if (error) return;
+
+    while (is_tokens_left()) {
+        keyword();
+
+        if (error) return;
+    }    
 }
