@@ -134,46 +134,38 @@ static void print_int(int reg) {
 
 
 static int interpret_ast(struct ASTNode* root) {
-    int leftval, rightval;
+    int leftreg, rightreg;
 
     // Get left, right sub-tree values.
     if (root->left)
-        leftval = interpret_ast(root->left);
+        leftreg = interpret_ast(root->left);
 
     if (root->right)
-        rightval = interpret_ast(root->right);
+        rightreg = interpret_ast(root->right);
 
     switch (root->op) {
         case A_ADD:
             {
-                int r1 = rload(leftval);
-                int r2 = rload(rightval);
-                print_int(radd(r1, r2));
+                return radd(leftreg, rightreg);
             }
             break;
         case A_SUB:
             {
-                int r1 = rload(leftval);
-                int r2 = rload(rightval);
-                print_int(rsub(r1, r2));
+                return rsub(leftreg, rightreg);
             }
             break;
         case A_MUL: 
             {
-                int r1 = rload(leftval);
-                int r2 = rload(rightval);
-                print_int(rmul(r1, r2));
+                return rmul(leftreg, rightreg);
             }
             break;
         case A_DIV:
             {
-                int r1 = rload(leftval);
-                int r2 = rload(rightval);
-                print_int(rdiv(r1, r2));
+                return rdiv(leftreg, rightreg);
             }
             break;
         case A_INTLIT:
-            return root->val_int;
+            return rload(root->val_int);
     }
 
     return 0;
@@ -187,7 +179,7 @@ void gencode(struct ASTNode* node) {
 
     out = fopen(ASM_OUT, "w");
     program_prologue(); 
-    interpret_ast(node);
+    print_int(interpret_ast(node));
     epilogue();
     fclose(out);
     
