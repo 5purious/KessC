@@ -1,0 +1,5 @@
+int8 a = 2;
+
+if (1) {
+    prints(a);
+}

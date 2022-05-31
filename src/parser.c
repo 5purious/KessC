@@ -145,7 +145,7 @@ static struct ASTNode* if_statement(void) {
 
     condAST = binexpr();
 
-    if (condAST->op < A_CMP || condAST->op > A_GE) {
+    if ((condAST->op < A_CMP || condAST->op > A_GE) && condAST->op != A_INTLIT) {
         printf(COLOR_ERROR "ERROR: Bad operator in if statement condition on line %ld\n", get_line());
         clean_and_exit();
     } 
