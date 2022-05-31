@@ -27,6 +27,7 @@ typedef enum {
     TT_RBRACE,
     TT_LPAREN,
     TT_RPAREN,
+    TT_VOID,
     TT_INVALID,
 } TOKEN_TYPE;
 

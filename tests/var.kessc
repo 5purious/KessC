@@ -1,2 +1,0 @@
-int8 a = 2;
-prints(a);

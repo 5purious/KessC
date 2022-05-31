@@ -139,6 +139,33 @@ static struct ASTNode* prints(void) {
 }
 
 
+static struct ASTNode* func_def(void) {
+    struct ASTNode* tree;
+
+    // Ensure there is an identifier.
+    scan(&cur_token);
+    match(TT_IDENT, "Identifier");
+ 
+    // Allocate memory for glob.
+    char* glob_ident = malloc(sizeof(char) * strlen(lexer_get_last_ident()) + 1);
+            
+    // Copy contents of old identifier into buffer.
+    strcpy(glob_ident, lexer_get_last_ident());
+
+    scan(&cur_token);
+
+    // Ensure there is open parenthesis followed by 
+    // close parenthesis.
+    match(TT_LPAREN, "'('");
+    scan(&cur_token);
+    match(TT_RPAREN, "')'");
+
+    scan(&cur_token);
+    tree = compound_statement();
+    return mkastunary(A_FUNCTION, tree, add_glob(glob_ident));
+}
+
+
 static struct ASTNode* if_statement(void) {
     struct ASTNode *condAST, *trueAST = NULL;
 
@@ -248,6 +275,8 @@ static void keyword(void) {
         case TT_IF:
             interpret_ast(if_statement(), -1, -1);
             break;
+        case TT_VOID:
+            interpret_ast(func_def(), 0, -1);
         default: break;
     }
 }

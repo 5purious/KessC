@@ -23,6 +23,7 @@ typedef enum {
     A_IF,
     A_PRINTVAR,
     A_IDENT,
+    A_FUNCTION,
 } AST_NODE_TYPE;
 
 

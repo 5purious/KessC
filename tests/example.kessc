@@ -1,0 +1,5 @@
+void main() {
+    prints(2);
+}
+
+int8 a = 2;

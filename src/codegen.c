@@ -66,21 +66,24 @@ static void program_prologue() {
 	"\tnop\n"
 	"\tleave\n"
 	"\tret\n"
-	"\n"
-	"\t.globl\tmain\n"
-	"\t.type\tmain, @function\n"
-	"main:\n"
-	"\tpushq\t%rbp\n"
-	"\tmovq	%rsp, %rbp\n",
+	"\n",
     out);
 }
 
-static void epilogue(void) {
-    fputs(
-            "\t# End of program (epilogue).\n"
-            "\tmovl\t$0, %eax\n"
-            "\tpopq\t%rbp\n"
-            "\tretq\n", out);
+
+static void func_prologue(const char* name) {
+    fprintf(out,
+          "\t"
+          "\t.text\n"
+          "\t.globl\t%s\n"
+          "\t.type\t%s, @function\n"
+          "%s:\n" "\tpushq\t%%rbp\n"
+          "\tmovq\t%%rsp, %%rbp\n", name, name, name);
+}
+
+
+static void func_epilogue(void) {
+    fputs("\tmovl $0, %eax\n" "\tpopq     %rbp\n" "\tret\n", out);
 }
 
 
@@ -336,6 +339,14 @@ int interpret_ast(struct ASTNode* root, uint8_t reg, int parent_ast_top) {
             break;
         case A_INTLIT:
             return rload(root->val_int);
+        case A_FUNCTION:
+            {
+                extern struct SymbolTable globl_sym_tbl[NSYMBOLS];
+                func_prologue(globl_sym_tbl[root->symbol_id].name);
+                interpret_ast(root->left, -1, root->op);
+                func_epilogue();
+                return -1;
+            }
         case A_LVIDENT:
             {
                 extern struct SymbolTable globl_sym_tbl[NSYMBOLS];
@@ -367,7 +378,6 @@ void codegen_init(void) {
 
 
 void codegen_done(void) {
-    epilogue();
     fclose(out);
     
     extern uint8_t only_assembly;

@@ -111,6 +111,8 @@ static TOKEN_TYPE check_keyword(char* pkw) {
         return TT_INT8;
     } else if (strcmp(pkw, "if") == 0) {
         return TT_IF;
+    } else if (strcmp(pkw, "void") == 0) {
+        return TT_VOID;
     }
 
     // Didn't find a keyword, must be an indetifier.
