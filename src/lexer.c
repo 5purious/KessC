@@ -17,7 +17,7 @@ static const char* last_ident = NULL;
 
 
 size_t get_line(void) {
-    return line == 1 ? 1 : line - 1;
+    return line;
 }
 
 
