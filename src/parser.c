@@ -30,6 +30,10 @@ static struct ASTNode* primary() {
             n = mkastleaf(A_INTLIT, cur_token.val_int);
             scan(&cur_token);
             return n;
+        case TT_IDENT: 
+            n = mkastleaf(A_IDENT, rload_glob((char*)lexer_get_last_ident()));
+            scan(&cur_token);
+            return n;
         default:
             if (cur_token.type == TT_EOF) return NULL;
             printf(COLOR_ERROR "Error: Syntax error on line %ld\n", get_line());

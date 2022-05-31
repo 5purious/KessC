@@ -343,6 +343,8 @@ int interpret_ast(struct ASTNode* root, uint8_t reg, int parent_ast_top) {
             }
         case A_ASSIGN:
             return rightreg; 
+        case A_IDENT:
+            return root->val_int;
         default:
             return 0;
     }

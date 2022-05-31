@@ -1,5 +1,5 @@
 int8 a = 2;
 
-if (1) {
+if (a < 3) {
     prints(a);
 }
